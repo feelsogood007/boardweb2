@@ -1,0 +1,293 @@
+$(document).ready(function(){
+   $('button').click(function(){
+	$(this).hide();
+    });
+});
+
+
+A. vue 에서 jQuery 와 Bootstrap 사용하기
+
+1. vue.js 에서 jQuery 사용하는 방법
+
+http://vuejs.kr/jekyll/update/2017/03/02/vuejs-jquery-bootstrap/
+
+
+** vue init webpack-simple 보다는 webpack 을 이용해서 프로젝트를 생성해야 나중에 웹팩수정작업에 좀 더 편리하다.
+
+npm i --save-dev expose-loader
+npm i --save jquery
+
+-> package.json 파일에 코드가 추가
+
+/src/main.js 에 다음 코드 추가
+
+import 'expose-loader?$!expose-loader?jQuery!jquery'
+
+npm run dev 로 서버 실행 후 http://localhost:8080/ 에 접속 한후에
+개발자 도구에서 $를 사용해서 jQuery 를 사용할 수 있다.
+
+2. vue.js 에서 Bootstrap 이용하는 방법
+ - Bootstrap : 트위터에서 만든 jQuery 기반의 UI Framework 
+
+npm i --save bootstrap
+
+/src/main.js 에 다음 코드 추가
+
+import 'expose-loader?$!expose-loader?jQuery!jquery'
+// 위에서 추가했던 jQuery 밑에 코드를 작성하세요
+
+import 'bootstrap'
+import 'bootstrap/dist/css/bootstrap.min.css'
+
+
+<template>
+...
+  <button type="button" class="btn btn-primary" autocomplate="off" data-loading-text="jquery with bootstrap" @click="clickBtn">
+...
+</template>
+  
+<script>
+  export default {
+    name: 'jQueryApp',
+    methods: {
+      clickBtn (event) {
+        $(event.target).button('loading')
+        
+        setTimeout(function() {
+          $(event.target).button('reset')
+        }, 1000);
+      }
+    } 
+  } 
+</script>
+
+만일, 다음과 같은 에러시에
+
+ERROR in ./node_modules/bootstrap/dist/js/bootstrap.js
+Module not found: Error: Can't resolve 'popper.js' in 'D:\Dev\vuejs\uilib\node_modules\bootstrap\dist\js'
+ @ ./node_modules/bootstrap/dist/js/bootstrap.js 7:82-102
+ @ ./src/main.js
+
+아래의 명령실행
+npm install popper.js -D
+
+
+
+B. Vuex 사용
+
+- 상태관리(실상은 컴포넌트간의 공유 데이터 관리)
+- 기존 상.하 컴포넌트간의 데이터 교환 방식의 단점을 해결
+   * Vue 의 기본 컴포넌트 통신방식인 상위 - 하위 에서 중간에 거쳐야 할 컴포넌트가 많아짐
+   * Event Bus 를 활용하여 상하위 관계가 아닌 컴포넌트 간 통신시 관리가 되지 않는 점
+
+https://joshua1988.github.io/web-development/vuejs/vuex-start/
+
+상태관리 구성요소는 크게 3가지가 있다.
+
+[상태관리 패턴]
+state : 컴포넌트 간 공유될 data
+view : 데이터가 표현될 template
+actions : 사용자의 입력에 따라 반응할 methods
+
+- store.js 생성이 키포인트 (공유 데이터 포함)
+
+// store.js
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+Vue.use(Vuex);
+
+export const store = new Vuex.Store({
+  // counter 라는 state 속성을 추가
+  state: {
+    counter : 0
+  },
+});
+
+// main.js 수정
+
+// store.js 불러옴
+
+import { store } from '../store'
+
+new Vue({
+  el: '#app',
+  // Vue 인스턴스에 등록한다.
+  store,
+  render: h => h(App)
+})
+
+
+--------------------------------------------------------------------------
+에뮬레이터 뛰우는 방법
+
+1. PATH 경로에 잡힌 Android\Sdk\tools\emulator.exe 가 실행되기 때문에 다음경로로 직접 이동한다.
+   
+-> cd C:\Users\hrkim.ITEMBAY\AppData\Local\Android\Sdk\emulator
+
+2. emulator -help 명령어로 가상디바이스 확인
+> emulator -list-avds
+Galaxy_Nexus_API_21
+Nexus_5X_API_26
+
+3. C:\Users\hrkim.ITEMBAY\AppData\Local\Android\Sdk\emulator>emulator -avd Nexus_5X_API_26
+Hax is enabled
+Hax ram_size 0x60000000
+path C:\Users\hrkim.ITEMBAY\.android\avd\Nexus_5X_API_26.avd\system.img.qcow2
+path C:\Users\hrkim.ITEMBAY\.android\avd\Nexus_5X_API_26.avd\vendor.img.qcow2
+HAX is working and emulator runs in fast virt mode.
+audio: Failed to create voice `goldfish_audio_in'
+qemu-system-i386.exe: warning: opening audio input failed
+audio: Failed to create voice `adc'
+Your emulator is out of date, please update by launching Android Studio:
+ - Start Android Studio
+ - Select menu "Tools > Android > SDK Manager"
+ - Click "SDK Tools" tab
+ - Check "Android Emulator" checkbox
+ - Click "OK"
+
+>>>>> react-native 기본설치는 완료 함. 그러나 vue native 는 수행이 안됨.
+
+> 에뮬레이터를 실행하고 나서
+C:\WINDOWS\system32>adb devices
+List of devices attached
+emulator-5554   device
+
+> adb 의 역할은 무엇인가? 디버그 브릿지 역할
+
+adb -s emulator-5554 reverse tcp:8088 tcp:8088
+emulator -avd Nexus_5X_API_26 -port 5554 reverse tcp:8088 tcp:8088
+
+> ANDROID_SDK_HOME
+> ANDROID_HOME
+> ANDROID_SDK_ROOT (사용 안하는 것이 좋음)
+3개는 동일 경로 C:\Users\hrkim.ITEMBAY\AppData\Local\Android\Sdk
+
+> ANDROID_AVD_HOME
+C:\Users\hrkim.ITEMBAY\.android\avd
+
+
+---------------------------------------------------------------
+1. JAVA_HOME 환경변수 설정, 8버전으로 설정
+2. unable to load script from assets index.android.bundle 에러
+
+참고사이트 
+https://medium.com/@adityasingh_32512/solved-unable-to-load-script-from-assets-index-android-bundle-bdc5e3a3d5ff
+
+-- 안드로이드용으로 assets 폴더를 만들고, 번들명령어 이용한다.
+
+mkdir android/app/src/main/assets
+react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+react-native run-android
+
+초기 구동은 완료되지만.
+App.js 수정후 reload 를 누르면 에러발생
+e
+the development server returned response error code 403 reload
+
+8081 port 는 McAfee Agent Common Services 가 이용하고 있다.
+
+실제 장비
+adb -s 275450a809217ece reverse tcp:8089 tcp:8089
+
+
+
+-------------------------------------------------------------------------------------------
+전역설치 위치
+- C:\Users\%USERNAME%\AppData\Roaming\npm\node_modules
+
+------------------------------------------------------------------------------------------
+react-native 에러 발생시 조치
+
+안드로이드 에뮬레이트에서 다음과 같은 메시지의 붉은색 에러창이 뜸
+"android the development server returned response error code 500"
+
+react-native init Project
+cd Project
+npm uninstall --save react-native
+npm install --save react-native@0.55.4
+npm uninstall --save babel-preset-react-native
+npm install --save babel-preset-react-native@4.0.0
+react-native run-android
+
+--------------------------------------------------
+스크립트 모듈 스펙
+
+1. CommonJS : 동기식
+2. AMD (Asyncronous Module Definition) : 비동기식, 브라우저용 RequireJS
+
+걸프(Gulp) : 반복적인 개발 작업을 자동화하는 빌드 도구. 그런트(Grunt)도 널리 쓰임.
+바벨(Babel) : ES6코드를 ES5로 변환해주는 트랜스컴파일러.
+ESLint : 자바스크립트 컨벤션 맞춰주는 도구.
+
+--------------------------------------------------
+트랜스파일링이 성공하여 자바스크립트 파일이 생성되었으면, Node.js 
+REPL(레플) 을 이용해 트랜스파일링된 person.js를 실행해보자.
+
+
+-------------------------------------------------------
+ECMA2015 
+
+class App extends Component {
+	render(){
+		return ( )
+	}
+}
+
+const testFunction = function(){
+
+}
+
+const testFunction= () => {
+
+}
+
+const testFunction = (firstName, lastName) => {
+	return firstName + ' ' + lastName;
+}
+
+-- 매개변수가 한개이면 ()를 생략해도 된다.
+const singleParam = firstName => {
+	return firstName;
+}
+
+<div className='App'><h2>달리는 기차 위에 중립은 없다</h2></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
